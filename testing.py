@@ -54,6 +54,12 @@ def get_songs_by_artist(token, artist_id):
     json_result = json.loads(result.content)["tracks"]
     return json_result
 
+# not working
+def get_me(token):
+    url = "https://api.spotify.com/v1/me"
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    return json.loads(result.content)
 
 token = get_token()
 
@@ -63,3 +69,9 @@ songs = get_songs_by_artist(token, artist_id)
 
 for idx, song in enumerate(songs):
     print(f"{idx+1}. {song['name']}")
+
+
+me = get_me(token)
+print()
+print(me)
+
