@@ -4,8 +4,9 @@ import os
 import urllib.parse
 import requests
 
-# from playlist_names import get_playlists
-import playlist_names
+# for input arguments
+import sys 
+import spotify_requests
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -16,12 +17,16 @@ REDIRECT_URL = os.getenv('REDIRECT_URI')
 AUTH_URL = os.getenv('AUTH_URL')
 TOKEN_URL = os.getenv('TOKEN_URL')
 API_BASE_URL = os.getenv('API_BASE_URL')
+AVIALABLE_FUNC = os.getenv('AVAILABLE_FUNC')
+FUNC = '/BOO' if len(sys.argv) != 2 or sys.argv[1] not in AVIALABLE_FUNC else f'/{sys.argv[1]}'
 
 app = Flask(__name__)
 app.secret_key = "fvY2WQ8S-8t9UZ_53BRkrQ"
 
 @app.route('/')
 def index():
+    if len(sys.argv) != 2:
+        return "BEEP BOOP no function specified"
     return "Welcome welcome <a href='/login'>Login</a>"
 
 
@@ -32,8 +37,7 @@ def login():
         'client_id': CLIENT_ID,
         'response_type': 'code',
         'redirect_uri': REDIRECT_URL,
-        'scope': scope, 
-        'show_dialog': True
+        'scope': scope
     }
 
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
@@ -62,13 +66,12 @@ def callback():
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
     
-    return redirect('/playlists')
+    return redirect(FUNC)
 
 
-@app.route('/playlists')
-def playlists():
-    return playlist_names.get_playlists(session)
-
+@app.route(FUNC)
+def func():
+    return getattr(spotify_requests, f'get_{FUNC[1:]}')(session)
 
 @app.route('/refresh-token')
 def refresh_token():
@@ -89,8 +92,12 @@ def refresh_token():
         session['access_token'] = new_token_info['access_token']
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in']
 
-        return redirect('/playlists')
+        return redirect(FUNC)
     return ;
+
+@app.route('/BOO')
+def boo():
+    return "BOOOO"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
