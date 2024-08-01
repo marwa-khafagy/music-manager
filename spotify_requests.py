@@ -1,6 +1,6 @@
 import json
 import requests 
-from flask import jsonify, redirect
+from flask import jsonify, redirect, render_template
 from datetime import datetime
 import os
 
@@ -21,10 +21,7 @@ def get_playlists(session):
     }
 
     response = requests.get(f"{API_BASE_URL}me/playlists", headers=headers)
-    playlists = json.loads(response.content)['items']
-
-    for idx, playlist in enumerate(playlists):
-        print(f"{idx+1}. {playlist['name']}")
-
-    return "hello"; #jsonify(playlists)
-    # return (x for x in jsonify(playlists)['items']['name'])
+    playlists = response.json().get('items', [])
+    
+    # Render the template with the playlists data
+    return render_template('playlists.html', playlists=playlists)
