@@ -54,24 +54,38 @@ def get_songs_by_artist(token, artist_id):
     json_result = json.loads(result.content)["tracks"]
     return json_result
 
+def get_genre_by_artist(token, artist_id):
+    url = f"https://api.spotify.com/v1/artists/{artist_id}"
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    json_result = json.loads(result.content)["genres"]
+    return json_result
 # not working
 def get_me(token):
-    url = "https://api.spotify.com/v1/me"
+    url = "https://api.spotify.com/v1/search?q=tag%3AArabic&type=track&limit=50"
     headers = get_auth_header(token)
     result = get(url, headers=headers)
     return json.loads(result.content)
 
 token = get_token()
 
-result = search_for_artist(token, "Taylor Swift")
+result = search_for_artist(token, "Haifa Wehbe")
 artist_id = result["id"]
-songs = get_songs_by_artist(token, artist_id)
+# songs = get_songs_by_artist(token, artist_id)
 
-for idx, song in enumerate(songs):
-    print(f"{idx+1}. {song['name']}")
+genre = get_genre_by_artist(token, artist_id)
 
+# for idx, song in enumerate(songs):
+#     print(f"{idx+1}. {song['name']}")
 
-me = get_me(token)
+print(genre)
+
+# print('\n\n')
+
+me = get_me(token)['tracks']['items']
+
+# for idx, song in enumerate(me):
+#     print(f"{idx+1}. {song['name']}")
 print()
-print(me)
+# print(me)
 
