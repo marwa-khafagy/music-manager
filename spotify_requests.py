@@ -26,7 +26,7 @@ def get_playlists(session):
     # Render the template with the playlists data
     return render_template('playlists.html', playlists=playlists)
 
-def get_tracks(session):
+def get_liked_tracks(session):
     if 'access_token' not in session:
         return redirect('/login')
 
@@ -48,7 +48,7 @@ def get_tracks(session):
     tracks = data.get('items', [])
 
     # Debugging output
-    print("Raw API Response:", data)
+    # print("Raw API Response:", data)
     print("Status Code:", response.status_code)
     # print("Tracks:", tracks)
 
