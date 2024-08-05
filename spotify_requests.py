@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 API_BASE_URL = os.getenv('API_BASE_URL')
 AR_GENRES = os.getenv('ARAB_GENRES')
+PLAYLIST = os.getenv('PLAYLIST')
+PLAYLIST_ID = os.getenv('PLAYLIST_ID')
 
 def get_playlists(session):
     if 'access_token' not in session:
@@ -28,7 +30,7 @@ def get_playlists(session):
     playlists = response.json().get('items', [])
     return render_template('playlists.html', playlists=playlists)
 
-def get_liked_tracks(session):
+def get_liked_tracks(session, offset):
     if 'access_token' not in session:
         return redirect('/login')
 
@@ -38,7 +40,7 @@ def get_liked_tracks(session):
     headers = global_functions.get_auth_header(session['access_token'])
 
     try:
-        response = requests.get(f"{API_BASE_URL}me/tracks?limit=50", headers=headers)
+        response = requests.get(f"{API_BASE_URL}me/tracks?limit=50&offset={offset}", headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print("Failed to fetch tracks:", e)
@@ -46,9 +48,30 @@ def get_liked_tracks(session):
 
     tracks = response.json().get('items', [])
     for idx, track in enumerate(tracks):
-        print(f"{idx+1}. {track['track']['name']}")
+        print(f"{idx+1+offset}. {track['track']['name']}")
 
     return tracks
+
+# def get_recent_ar_tracks(session):
+#     if 'access_token' not in session:
+#         return redirect('/login')
+
+#     if datetime.now().timestamp() > session['expires_at']:
+#         return redirect('/refresh-token')
+
+#     tracks = get_liked_tracks(session, 0) + get_liked_tracks(session, 50)
+#     ar_tracks = [track for track in tracks if is_ar_track(session, track['track'])]
+
+#     playlist = get_ar_playlist(session)
+#     idx = 1
+
+#     for track in ar_tracks:  # Accessing the 'items' list inside the playlist
+#         if track['track'] not in [playlist_it['track'] for playlist_it in playlist]:  # Compare track objects
+#             if track['track']['name']:
+#                 print(f"{idx}. {track['track']['name']}")
+#             idx += 1
+        
+#     return render_template('liked.html', tracks=ar_tracks)
 
 def get_recent_ar_tracks(session):
     if 'access_token' not in session:
@@ -57,9 +80,19 @@ def get_recent_ar_tracks(session):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    tracks = get_liked_tracks(session)
-    ar_tracks = [track for track in tracks if is_ar_track(session, track['track'])]
-    return render_template('liked.html', tracks=ar_tracks)
+    liked_tracks = get_liked_tracks(session, 0) + get_liked_tracks(session, 50)
+    ar_tracks = [track for track in liked_tracks if is_ar_track(session, track['track'])]
+
+    playlist = get_ar_playlist(session)
+    playlist_track_ids = {track['track']['id'] for track in playlist if track['track']}
+
+    unique_ar_tracks = [track for track in ar_tracks if track['track']['id'] not in playlist_track_ids]
+    
+    for idx, track in enumerate(unique_ar_tracks):
+        if track['track']['name']:
+            print(f"{idx + 1}. {track['track']['name']}")
+
+    return render_template('liked.html', tracks=unique_ar_tracks)
 
 def is_ar_track(session, track):
     artist_id = track['artists'][0]['id']
@@ -120,3 +153,28 @@ def get_genre_by_artist(session, artist_id):
         return jsonify({'error': 'Failed to parse artist genres'}), 500
 
     return genres
+
+def get_ar_playlist(session):
+    if 'access_token' not in session:
+        return redirect('/login')
+
+    if datetime.now().timestamp() > session['expires_at']:
+        return redirect('/refresh-token')
+
+    headers = global_functions.get_auth_header(session['access_token'])
+    # response = requests.get(f"{API_BASE_URL}v1/search?q={PLAYLIST}&type=playlist&limit=1", headers=headers)
+    # response = requests.get(f"https://api.spotify.com/v1/search?q=Arabic+all+the+way&type=playlist&limit=1", headers=headers)
+    response = requests.get(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}", headers=headers)
+
+    if response.status_code != 200:
+        print("Failed to fetch playlists:", response.status_code)
+        return jsonify({'error': 'Failed to fetch playlists'}), 500
+
+    playlists = response.json()
+
+    print("debug:" , playlists['name'])
+
+    return playlists['tracks']['items']
+
+
+

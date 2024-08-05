@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, jsonify
+from flask import Flask, redirect, request, session, jsonify, render_template
 from datetime import datetime
 import os
 import urllib.parse
@@ -28,7 +28,8 @@ app.secret_key = "fvY2WQ8S-8t9UZ_53BRkrQ"
 def index():
     if len(sys.argv) != 2:
         return "BEEP BOOP no function specified"
-    return "Welcome welcome <a href='/login'>Login</a>"
+    # return "Welcome welcome <a href='/login'>Login</a>"
+    return render_template('index.html')
 
 
 @app.route('/login')
