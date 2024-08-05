@@ -79,7 +79,7 @@ def get_last_50(token):
 
 token = get_token()
 
-result = search_for_artist(token, "Haifa Wehbe")
+result = search_for_artist(token, "Natasha Bedingfield")
 artist_id = result["id"]
 # songs = get_songs_by_artist(token, artist_id)
 
@@ -88,12 +88,12 @@ genre = get_genre_by_artist(token, artist_id)
 # for idx, song in enumerate(songs):
 #     print(f"{idx+1}. {song['name']}")
 
-tracks = get_last_50(token)
+# tracks = get_last_50(token)
 
-for idx, song in enumerate(tracks):
-    print(f"{idx+1}. {song['name']}")
+# for idx, song in enumerate(tracks):
+#     print(f"{idx+1}. {song['name']}")
 
-# print(genre)
+print(genre)
 
 # print('\n\n')
 
