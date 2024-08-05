@@ -25,3 +25,39 @@ def get_playlists(session):
     
     # Render the template with the playlists data
     return render_template('playlists.html', playlists=playlists)
+
+def get_tracks(session):
+    if 'access_token' not in session:
+        return redirect('/login')
+
+    if datetime.now().timestamp() > session['expires_at']:
+        return redirect('/refresh-token')
+    
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+
+    try:
+        response = requests.get(f"{API_BASE_URL}me/tracks?limit=50", headers=headers)
+        response.raise_for_status()  # Raise an error for bad HTTP status codes
+    except requests.exceptions.RequestException as e:
+        print("Failed to fetch tracks:", e)
+        return jsonify({'error': 'Failed to fetch tracks'}), 500
+
+    data = response.json()
+    tracks = data.get('items', [])
+
+    # Debugging output
+    print("Raw API Response:", data)
+    print("Status Code:", response.status_code)
+    # print("Tracks:", tracks)
+
+    return render_template('liked.html', tracks=tracks)
+
+
+def get_recent_ar_tracks():
+    return;
+
+def is_ar_track(track):
+    return;
+

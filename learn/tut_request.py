@@ -67,6 +67,16 @@ def get_me(token):
     result = get(url, headers=headers)
     return json.loads(result.content)
 
+
+def get_last_50(token):
+    url = f"https://api.spotify.com/v1/me/tracks?limit=50"
+    headers = get_auth_header(token)
+    query = "?market=US"
+    query_url = url + query
+
+    result = get(query_url, headers=headers)
+    return json.loads(result.content)["items"]
+
 token = get_token()
 
 result = search_for_artist(token, "Haifa Wehbe")
@@ -78,7 +88,12 @@ genre = get_genre_by_artist(token, artist_id)
 # for idx, song in enumerate(songs):
 #     print(f"{idx+1}. {song['name']}")
 
-print(genre)
+tracks = get_last_50(token)
+
+for idx, song in enumerate(tracks):
+    print(f"{idx+1}. {song['name']}")
+
+# print(genre)
 
 # print('\n\n')
 

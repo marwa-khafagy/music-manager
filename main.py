@@ -18,7 +18,8 @@ AUTH_URL = os.getenv('AUTH_URL')
 TOKEN_URL = os.getenv('TOKEN_URL')
 API_BASE_URL = os.getenv('API_BASE_URL')
 AVIALABLE_FUNC = os.getenv('AVAILABLE_FUNC')
-FUNC = '/BOO' if len(sys.argv) != 2 or sys.argv[1] not in AVIALABLE_FUNC else f'/{sys.argv[1]}'
+# FUNC = '/BOO' if len(sys.argv) != 2 or sys.argv[1] not in AVIALABLE_FUNC else f'/{sys.argv[1]}'
+FUNC = f'/{sys.argv[1]}'
 
 app = Flask(__name__)
 app.secret_key = "fvY2WQ8S-8t9UZ_53BRkrQ"
@@ -32,7 +33,7 @@ def index():
 
 @app.route('/login')
 def login():
-    scope = 'user-read-private user-read-email'
+    scope = 'user-read-private user-read-email user-library-read'
     params = {
         'client_id': CLIENT_ID,
         'response_type': 'code',
