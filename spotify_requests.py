@@ -80,15 +80,18 @@ def get_recent_ar_tracks(session):
     # filters out and prints tracks that are in the playlist
     unique_ar_tracks = []
     idx = 1
+    track_ids = []
     print("Arabic liked tracks already in the playlist:")
     for track in ar_tracks:
         if track['track']['id'] not in playlist_track_ids:
             unique_ar_tracks.append(track)
+            track_ids.append(f"spotify:track:{track['track']['id']}")
         else:
             print(f"{idx + 1}.{track['track']['name']}")
             idx += 1
-
-    return render_template('liked.html', tracks=unique_ar_tracks)
+    print(track_ids)
+    return add_songs_to_playlist(session, track_ids, unique_ar_tracks)
+    # return render_template('liked.html', tracks=unique_ar_tracks)
 
 # checks if the track is arabic
 def is_ar_track(session, track):
@@ -189,5 +192,25 @@ def get_ar_playlist(session):
     
     return songs
 
+
+def add_songs_to_playlist(session, track_ids, unique_ar_tracks):
+    if 'access_token' not in session:
+        return redirect('/login')
+
+    if datetime.now().timestamp() > session['expires_at']:
+        return redirect('/refresh-token')
+
+    headers = global_functions.get_auth_header(session['access_token'])
+
+    # adds the unique tracks to the playlist
+    req_body = {
+        'uris': track_ids
+    }
+    response = requests.post(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}/tracks", headers=headers, json=req_body)
+    if response.status_code != 201:
+            print("Failed to fetch playlists:", response.json())
+            return jsonify({'error': 'Failed to fetch playlists'}), 500
+
+    return render_template('liked.html', tracks=unique_ar_tracks)
 
 
