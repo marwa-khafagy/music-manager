@@ -25,8 +25,8 @@ app.secret_key = "fvY2WQ8S-8t9UZ_53BRkrQ"
 
 @app.route('/')
 def index():
-    if len(sys.argv) != 2:
-        return "BEEP BOOP no function specified"
+    # if len(sys.argv) != 2:
+    #     return "BEEP BOOP no function specified"
     # return "Welcome welcome <a href='/login'>Login</a>"
     return render_template('index.html')
 

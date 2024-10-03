@@ -93,6 +93,10 @@ def add_recent_tracks(session):
             print(f"{idx + 1}.{track['track']['name']}")
             idx += 1
     print(track_ids)
+    if len(track_ids) == 0:
+        print("No new tracks to add")
+        return render_template('liked.html', tracks=unique_ar_tracks)
+    
     return add_songs_to_playlist(session, track_ids, unique_ar_tracks)
     # return render_template('liked.html', tracks=unique_ar_tracks)
 

@@ -12,6 +12,11 @@
             <h1>Songs added to your playlist</h1>
             <a href="/" class="btn btn-secondary">Home</a>
         </div>
+        {% if tracks|length == 0 %}
+        <div class="alert alert-info" role="alert">
+            Your playlist is up to date! No new songs were added to your playlist.
+        </div>
+        {% else %}
         <div class="row">
             {% for item in tracks %}
             <div class="col-md-4">
@@ -29,6 +34,7 @@
             </div>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
