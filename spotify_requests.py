@@ -4,17 +4,20 @@ from flask import jsonify, redirect, render_template
 # for refresh token 
 from datetime import datetime
 
-import global_functions
 # for environment variables
 import os
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-API_BASE_URL = os.getenv('API_BASE_URL')
-AR_GENRES = os.getenv('ARAB_GENRES')
-PLAYLIST = os.getenv('PLAYLIST')
+GENRES = os.getenv('GENRES')
 PLAYLIST_ID = os.getenv('PLAYLIST_ID')
+
+API_BASE_URL = "https://api.spotify.com/v1/"
+
+
+def get_auth_header(token):
+    return {"Authorization": f"Bearer {token}"}
 
 # input 'playlists' to print all available playlists
 # can be used to get playlist id
@@ -25,7 +28,7 @@ def get_playlists(session):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
     response = requests.get(f"{API_BASE_URL}me/playlists", headers=headers)
     
     if response.status_code != 200:
@@ -42,7 +45,7 @@ def get_liked_tracks(session, offset):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
 
     try:
         response = requests.get(f"{API_BASE_URL}me/tracks?limit=50&offset={offset}", headers=headers)
@@ -55,10 +58,10 @@ def get_liked_tracks(session, offset):
 
     return tracks
 
-# prints all arabic liked tracks in terminal
+# prints all liked tracks of chosen genre(s) in terminal
 # prints all ar songs not in the playlist in web 
-# input 'recent_ar_tracks' to get run this
-def get_recent_ar_tracks(session):
+# input 'recent_tracks' to get run this
+def add_recent_tracks(session):
     if 'access_token' not in session:
         return redirect('/login')
 
@@ -68,7 +71,7 @@ def get_recent_ar_tracks(session):
     # fetches last 100 liked tracks
     liked_tracks = get_liked_tracks(session, 0) + get_liked_tracks(session, 50)
     
-    # filters liked tracks to arabic tracks 
+    # filters liked tracks to genre tracks 
     ar_tracks = [track for track in liked_tracks if is_ar_track(session, track['track'])]
 
     # fetches all tracks in the ar playlist
@@ -81,7 +84,7 @@ def get_recent_ar_tracks(session):
     unique_ar_tracks = []
     idx = 1
     track_ids = []
-    print("Arabic liked tracks already in the playlist:")
+    print("Liked tracks of your chosen genre already in the playlist:")
     for track in ar_tracks:
         if track['track']['id'] not in playlist_track_ids:
             unique_ar_tracks.append(track)
@@ -93,7 +96,7 @@ def get_recent_ar_tracks(session):
     return add_songs_to_playlist(session, track_ids, unique_ar_tracks)
     # return render_template('liked.html', tracks=unique_ar_tracks)
 
-# checks if the track is arabic
+# checks if the track is part of genre
 def is_ar_track(session, track):
     artist_id = track['artists'][0]['id']
     if artist_id is None:
@@ -102,11 +105,11 @@ def is_ar_track(session, track):
     # list of genres associated with the artist
     genres = get_genre_by_artist(session, artist_id)
 
-    # checks if any of the genres are arabic
+    # checks if any of the genres are in our genre(s)
     for genre in genres:
         genre_words = genre.split()
         for word in genre_words:
-            if word in AR_GENRES:
+            if word in GENRES:
                 return True
     
     return False
@@ -115,7 +118,7 @@ def is_ar_track(session, track):
 # not used in the final code
 def get_artist_id(session, artist_name):
     url = f'{API_BASE_URL}search'
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
     query = f"?q={artist_name}&type=artist&limit=1"
     query_url = url + query
 
@@ -144,7 +147,7 @@ def get_artist_id(session, artist_name):
 # checks the genres that the artist is associated with
 def get_genre_by_artist(session, artist_id):
     url = f"{API_BASE_URL}artists/{artist_id}"
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
 
     # try to get artist genres
     try:
@@ -171,7 +174,7 @@ def get_ar_playlist(session):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
 
     # fetches the number of songs in the playlist
     num_of_songs = requests.get(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}/tracks?fields=total", headers=headers)
@@ -200,7 +203,7 @@ def add_songs_to_playlist(session, track_ids, unique_ar_tracks):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    headers = global_functions.get_auth_header(session['access_token'])
+    headers = get_auth_header(session['access_token'])
 
     # adds the unique tracks to the playlist
     req_body = {

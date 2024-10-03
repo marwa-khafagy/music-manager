@@ -11,15 +11,14 @@ import spotify_requests
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
+
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URL = os.getenv('REDIRECT_URI')
-AUTH_URL = os.getenv('AUTH_URL')
-TOKEN_URL = os.getenv('TOKEN_URL')
-API_BASE_URL = os.getenv('API_BASE_URL')
-AVIALABLE_FUNC = os.getenv('AVAILABLE_FUNC')
-# FUNC = '/BOO' if len(sys.argv) != 2 or sys.argv[1] not in AVIALABLE_FUNC else f'/{sys.argv[1]}'
-FUNC = f'/{sys.argv[1]}'
+
+AUTH_URL = "https://accounts.spotify.com/authorize"
+TOKEN_URL = "https://accounts.spotify.com/api/token"
+API_BASE_URL = "https://api.spotify.com/v1/"
 
 app = Flask(__name__)
 app.secret_key = "fvY2WQ8S-8t9UZ_53BRkrQ"
@@ -68,12 +67,12 @@ def callback():
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
     
-    return redirect(FUNC)
+    return redirect('/recent_tracks')
 
 
-@app.route(FUNC)
+@app.route('/recent_tracks')
 def func():
-    return getattr(spotify_requests, f'get_{FUNC[1:]}')(session)
+    return spotify_requests.add_recent_tracks(session)
 
 @app.route('/refresh-token')
 def refresh_token():
@@ -94,7 +93,7 @@ def refresh_token():
         session['access_token'] = new_token_info['access_token']
         session['expires_at'] = datetime.now().timestamp() + new_token_info['expires_in']
 
-        return redirect(FUNC)
+        return redirect('/recent_tracks')
     return ;
 
 @app.route('/BOO')
