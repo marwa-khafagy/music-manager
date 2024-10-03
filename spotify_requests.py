@@ -173,7 +173,7 @@ def get_ar_playlist(session):
     headers = get_auth_header(session['access_token'])
 
     # fetches the number of songs in the playlist
-    num_of_songs = requests.get(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}/tracks?fields=total", headers=headers)
+    num_of_songs = requests.get(f"{API_BASE_URL}playlists/{PLAYLIST_ID}/tracks?fields=total", headers=headers)
     num_of_songs = num_of_songs.json()['total']
     
     offset = 0
@@ -181,7 +181,7 @@ def get_ar_playlist(session):
 
     # fetches all the songs in the playlist, by 100 songs at a time
     while offset < num_of_songs:
-        response = requests.get(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}/tracks?fields=items.track.id&limit=100&offset={offset}", headers=headers)
+        response = requests.get(f"{API_BASE_URL}playlists/{PLAYLIST_ID}/tracks?fields=items.track.id&limit=100&offset={offset}", headers=headers)
         if response.status_code != 200:
             print("Failed to fetch playlists:", response.status_code)
             return jsonify({'error': 'Failed to fetch playlists'}), 500
@@ -205,7 +205,7 @@ def add_songs_to_playlist(session, track_ids, unique_ar_tracks):
     req_body = {
         'uris': track_ids
     }
-    response = requests.post(f"https://api.spotify.com/v1/playlists/{PLAYLIST_ID}/tracks", headers=headers, json=req_body)
+    response = requests.post(f"{API_BASE_URL}playlists/{PLAYLIST_ID}/tracks", headers=headers, json=req_body)
     if response.status_code != 201:
             print("Failed to fetch playlists:", response.json())
             return jsonify({'error': 'Failed to fetch playlists'}), 500
