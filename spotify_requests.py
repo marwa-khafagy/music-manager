@@ -42,8 +42,7 @@ def get_liked_tracks(session, offset, limit):
     return tracks
 
 # prints all liked tracks of chosen genre(s) in terminal
-# prints all ar songs not in the playlist in web 
-# input 'recent_tracks' to get run this
+# prints all genre songs not in the playlist in web 
 def add_recent_tracks(session):
     if 'access_token' not in session:
         return redirect('/login')
@@ -64,22 +63,22 @@ def add_recent_tracks(session):
             break
     
     # filters liked tracks to genre tracks 
-    ar_tracks = [track for track in liked_tracks if is_ar_track(session, track['track'])]
+    genre_tracks = [track for track in liked_tracks if is_genre_track(session, track['track'])]
 
     # fetches all tracks in the ar playlist
-    playlist = get_ar_playlist(session)
+    playlist = get_playlist(session)
 
     # gets all track ids in the playlist
     playlist_track_ids = {track['track']['id'] for track in playlist if track['track']}
 
     # filters out and prints tracks that are in the playlist
-    unique_ar_tracks = []
+    unique_genre_tracks = []
     idx = 1
     track_ids = []
     print("Liked tracks of your chosen genre already in the playlist:")
-    for track in ar_tracks:
+    for track in genre_tracks:
         if track['track']['id'] not in playlist_track_ids:
-            unique_ar_tracks.append(track)
+            unique_genre_tracks.append(track)
             track_ids.append(f"spotify:track:{track['track']['id']}")
         else:
             print(f"{idx}.{track['track']['name']}")
@@ -87,13 +86,13 @@ def add_recent_tracks(session):
     print(track_ids)
     if len(track_ids) == 0:
         print("No new tracks to add")
-        return render_template('liked.html', tracks=unique_ar_tracks)
+        return render_template('liked.html', tracks=unique_genre_tracks)
     
-    return add_songs_to_playlist(session, track_ids, unique_ar_tracks)
+    return add_songs_to_playlist(session, track_ids, unique_genre_tracks)
     # return render_template('liked.html', tracks=unique_ar_tracks)
 
 # checks if the track is part of genre
-def is_ar_track(session, track):
+def is_genre_track(session, track):
     artist_id = track['artists'][0]['id']
     if artist_id is None:
         return False
@@ -163,7 +162,7 @@ def get_genre_by_artist(session, artist_id):
     return genres
 
 # returns all the track id's in the playlist
-def get_ar_playlist(session):
+def get_playlist(session):
     if 'access_token' not in session:
         return redirect('/login')
 
