@@ -11,7 +11,7 @@ This project is an application that lets users log in with their Spotify account
 
 ## Prerequisites
 
-Before starting, ensure you aa [Spotify Developer Account](https://developer.spotify.com/dashboard/login) with an app created.
+Before starting, ensure you have a [Spotify Developer Account](https://developer.spotify.com/dashboard/login) with an app created.
 
 ## Getting Started
 
