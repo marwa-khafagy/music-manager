@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 GENRES = os.getenv('GENRES')
 PLAYLIST_ID = os.getenv('PLAYLIST_ID')
-RECENT_TRACKS = os.getenv('RECENT_TRACKS')
+RECENT_TRACKS = int(os.getenv('RECENT_TRACKS'))
 
 API_BASE_URL = "https://api.spotify.com/v1/"
 
@@ -82,7 +82,7 @@ def add_recent_tracks(session):
             unique_ar_tracks.append(track)
             track_ids.append(f"spotify:track:{track['track']['id']}")
         else:
-            print(f"{idx + 1}.{track['track']['name']}")
+            print(f"{idx}.{track['track']['name']}")
             idx += 1
     print(track_ids)
     if len(track_ids) == 0:

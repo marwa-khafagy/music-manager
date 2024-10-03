@@ -22,3 +22,19 @@ git clone https://github.com/your-username/spotify-playlist-manager.git
 cd spotify-playlist-manager
 ```
 
+### 2. Create a `.env` file
+Create a .env file in the root directory of the project, using `.env.example` as a guide
+
+## Running the Application
+To start the app, run the following command
+```python
+python main.py
+```
+
+This will start the application locally at `http://localhost:5000`. Navigate to this URL in your browser. 
+Click on the login link to authorize via spotify and start the playlist update process. 
+
+Once the process is complete, you will see a list of tracks that have been added to your playlist. If no new tracks were found, you will be notified accordingly.
+
+## License
+This project is licensed under the MIT License.
