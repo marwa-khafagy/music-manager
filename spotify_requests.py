@@ -19,24 +19,6 @@ API_BASE_URL = "https://api.spotify.com/v1/"
 def get_auth_header(token):
     return {"Authorization": f"Bearer {token}"}
 
-# input 'playlists' to print all available playlists
-# can be used to get playlist id
-def get_playlists(session):
-    if 'access_token' not in session:
-        return redirect('/login')
-
-    if datetime.now().timestamp() > session['expires_at']:
-        return redirect('/refresh-token')
-
-    headers = get_auth_header(session['access_token'])
-    response = requests.get(f"{API_BASE_URL}me/playlists", headers=headers)
-    
-    if response.status_code != 200:
-        print("Failed to fetch playlists:", response.status_code)
-        return jsonify({'error': 'Failed to fetch playlists'}), 500
-
-    playlists = response.json().get('items', [])
-    return render_template('playlists.html', playlists=playlists)
 
 def get_liked_tracks(session, offset):
     if 'access_token' not in session:
