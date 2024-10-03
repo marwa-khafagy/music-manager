@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 GENRES = os.getenv('GENRES')
 PLAYLIST_ID = os.getenv('PLAYLIST_ID')
+RECENT_TRACKS = os.getenv('RECENT_TRACKS')
 
 API_BASE_URL = "https://api.spotify.com/v1/"
 
@@ -20,7 +21,7 @@ def get_auth_header(token):
     return {"Authorization": f"Bearer {token}"}
 
 
-def get_liked_tracks(session, offset):
+def get_liked_tracks(session, offset, limit):
     if 'access_token' not in session:
         return redirect('/login')
 
@@ -30,7 +31,7 @@ def get_liked_tracks(session, offset):
     headers = get_auth_header(session['access_token'])
 
     try:
-        response = requests.get(f"{API_BASE_URL}me/tracks?limit=50&offset={offset}", headers=headers)
+        response = requests.get(f"{API_BASE_URL}me/tracks?limit={limit}&offset={offset}", headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print("Failed to fetch tracks:", e)
@@ -50,8 +51,17 @@ def add_recent_tracks(session):
     if datetime.now().timestamp() > session['expires_at']:
         return redirect('/refresh-token')
 
-    # fetches last 100 liked tracks
-    liked_tracks = get_liked_tracks(session, 0) + get_liked_tracks(session, 50)
+    # Calculate how many pages of 50 tracks we need to fetch
+    tracks_to_fetch = min(RECENT_TRACKS, 100)  # Spotify limits requests to 100 tracks at a time
+    offsets = [i for i in range(0, RECENT_TRACKS, 50)]
+    liked_tracks = []
+
+    # Fetch the required number of tracks
+    for offset in offsets:
+        limit = min(50, RECENT_TRACKS - len(liked_tracks))  # Adjust limit to avoid fetching more than needed
+        liked_tracks += get_liked_tracks(session, offset, limit)
+        if len(liked_tracks) >= RECENT_TRACKS:
+            break
     
     # filters liked tracks to genre tracks 
     ar_tracks = [track for track in liked_tracks if is_ar_track(session, track['track'])]
