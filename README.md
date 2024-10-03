@@ -1,4 +1,4 @@
-# Spotify Playlist Manager
+# Music Manager
 
 This project is an application that lets users log in with their Spotify account to automatically add recently liked tracks of specified genres to a chosen playlist. It interacts with the Spotify Web API to fetch the user's liked tracks, filter them by genre, and add unique tracks to an existing playlist.
 
